@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="PersonalAIAgent.App/PersonalAIAgent.App.csproj" />
+  <Project Path="PersonalAIAgent.Core/PersonalAIAgent.Core.csproj" Id="d39d21a9-931a-4fe7-a537-872ee6490af5" />
+</Solution>
