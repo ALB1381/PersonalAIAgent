@@ -25,6 +25,59 @@
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
 
-</body>
+    <!-- Voice Recognition Interop -->
+    <script>
+                window.voiceInterop = {
+                    recognition: null,
+                    startListening: function (dotNetHelper) {
+                        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                        if (!SpeechRecognition) {
+                            console.error("Speech recognition is not supported in this environment.");
+                            alert("Speech recognition is not supported or needs to be enabled in WebView2.");
+                            return;
+                        }
 
+                        this.recognition = new SpeechRecognition();
+                        this.recognition.continuous = false;
+                        this.recognition.interimResults = true;
+
+                        this.recognition.onresult = (event) => {
+                            let interimTranscript = '';
+                            let finalTranscript = '';
+
+                            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                                if (event.results[i].isFinal) {
+                                    finalTranscript += event.results[i][0].transcript;
+                                } else {
+                                    interimTranscript += event.results[i][0].transcript;
+                                }
+                            }
+
+                            if (finalTranscript !== '') {
+                                dotNetHelper.invokeMethodAsync('ProcessVoiceCommand', finalTranscript.trim());
+                            } else {
+                                dotNetHelper.invokeMethodAsync('UpdateTranscript', interimTranscript);
+                            }
+                        };
+
+                        this.recognition.onerror = (event) => {
+                            console.error("Speech recognition error", event.error);
+                            dotNetHelper.invokeMethodAsync('StopListeningUI');
+                        };
+
+                        this.recognition.onend = () => {
+                             dotNetHelper.invokeMethodAsync('StopListeningUI');
+                        };
+
+                        this.recognition.start();
+                    },
+
+                    stopListening: function () {
+                        if (this.recognition) {
+                            this.recognition.stop();
+                        }
+                    }
+                };
+    </script>
+</body>
 </html>

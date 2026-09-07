@@ -8,9 +8,10 @@
 
   <ItemGroup>
     <Folder Include="Agents\" />
-    <Folder Include="Interfaces\" />
-    <Folder Include="Tools\" />
-    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mscc.GenerativeAI" Version="3.1.0" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using PersonalAIAgent.Core.Interfaces;
+using PersonalAIAgent.Core.Services;
+
 
 namespace PersonalAIAgent.App
 {
@@ -15,6 +18,8 @@ namespace PersonalAIAgent.App
                 });
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddSingleton<IAgentService, AgentService>();
+      
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();

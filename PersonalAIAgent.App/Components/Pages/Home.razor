@@ -1,5 +1,142 @@
 ﻿@page "/"
+@using PersonalAIAgent.Core.Interfaces
+@using PersonalAIAgent.Core.Models
+@implements IDisposable
+@inject IJSRuntime JS
+@inject IAgentService AgentService
 
-<h1>Hello, world!</h1>
+<div class="chat-container">
+    <header class="chat-header">
+        <h2>My Personal AI Agent</h2>
+    </header>
 
-Welcome to your new app.
+    <div class="message-list">
+        @foreach (var msg in Messages)
+        {
+            <div class="message @(msg.IsUser ? "user-message" : "ai-message")">
+                <div class="message-bubble">@msg.Text</div>
+            </div>
+        }
+    </div>
+
+    <div class="input-area">
+        <button class="mic-button @(IsListening ? "listening" : "")" @onclick="ToggleListening" title="Toggle Voice Input">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+            </svg>
+        </button>
+        <input type="text" @bind="CurrentInput" @bind:event="oninput" placeholder="Type or speak a command..." @onkeyup="HandleKeyPress" />
+        <button class="send-button" @onclick="SendMessage" disabled="@_isSending" title="Send Message">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+            </svg>
+        </button>
+    </div>
+</div>
+
+@code {
+    private List<ChatMessage> Messages = new();
+    private string CurrentInput = string.Empty;
+    private bool IsListening = false;
+    private bool _isSending;
+    private DotNetObjectReference<Home>? _objRef;
+
+    protected override void OnInitialized()
+    {
+        _objRef = DotNetObjectReference.Create(this);
+        Messages.Add(new ChatMessage { Text = "Agent initialized. Ready when you are.", IsUser = false });
+    }
+
+    private async Task ToggleListening()
+    {
+        IsListening = !IsListening;
+        if (IsListening)
+        {
+            await JS.InvokeVoidAsync("voiceInterop.startListening", _objRef);
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("voiceInterop.stopListening");
+        }
+    }
+
+    [JSInvokable]
+    public async Task UpdateTranscript(string transcript)
+    {
+        CurrentInput = transcript;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task ProcessVoiceCommand(string finalTranscript)
+    {
+        CurrentInput = finalTranscript;
+        IsListening = false;
+        await SendMessage();
+    }
+
+    [JSInvokable]
+    public async Task StopListeningUI()
+    {
+        IsListening = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SendMessage();
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        if (_isSending || string.IsNullOrWhiteSpace(CurrentInput))
+        {
+            return;
+        }
+
+        var command = CurrentInput.Trim();
+        CurrentInput = string.Empty;
+        Messages.Add(new ChatMessage { Text = command, IsUser = true });
+        _isSending = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var response = await AgentService.CallAgent(new CommandRequest
+            {
+                RequestToDo = command
+            });
+
+            Messages.Add(new ChatMessage
+            {
+                Text = response.ResponseText ?? "The agent returned no response.",
+                IsUser = false
+            });
+        }
+        catch (Exception exception)
+        {
+            Messages.Add(new ChatMessage
+            {
+                Text = $"The agent could not process the command: {exception.Message}",
+                IsUser = false
+            });
+        }
+        finally
+        {
+            _isSending = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose() => _objRef?.Dispose();
+
+    public class ChatMessage
+    {
+        public string Text { get; set; } = string.Empty;
+        public bool IsUser { get; set; }
+    }
+}
