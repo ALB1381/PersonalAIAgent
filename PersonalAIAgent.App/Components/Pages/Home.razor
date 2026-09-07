@@ -10,6 +10,17 @@
         <h2>My Personal AI Agent</h2>
     </header>
 
+    <!-- Voice Listening Overlay -->
+    @if (IsListening)
+    {
+        <div class="listening-overlay">
+            <div class="listening-circle"></div>
+            <p class="listening-text">Listening...</p>
+            <p class="interim-text">@CurrentInput</p>
+            <button class="cancel-mic-btn" @onclick="ToggleListening">Cancel</button>
+        </div>
+    }
+
     <div class="message-list">
         @foreach (var msg in Messages)
         {
@@ -27,7 +38,7 @@
             </svg>
         </button>
         <input type="text" @bind="CurrentInput" @bind:event="oninput" placeholder="Type or speak a command..." @onkeyup="HandleKeyPress" />
-        <button class="send-button" @onclick="SendMessage" disabled="@_isSending" title="Send Message">
+        <button class="send-button" @onclick="SendMessage" title="Send Message" disabled="@_isSending">
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
             </svg>
@@ -53,6 +64,7 @@
         IsListening = !IsListening;
         if (IsListening)
         {
+            CurrentInput = string.Empty; // Clears the input when the mic activates
             await JS.InvokeVoidAsync("voiceInterop.startListening", _objRef);
         }
         else

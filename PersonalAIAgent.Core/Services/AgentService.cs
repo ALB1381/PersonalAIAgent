@@ -16,7 +16,7 @@ namespace PersonalAIAgent.Core.Services
         {
            
             //You should replace your api that you got from google ai studio
-            var apiKey = "Your Gemini API";
+            var apiKey = "Your API Key";
             if (!string.IsNullOrWhiteSpace(apiKey))
             {
                 var googleAI = new GoogleAI(apiKey: apiKey);
