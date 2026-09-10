@@ -52,3 +52,4 @@ The application takes the raw string returned by Gemini and passes it directly t
 1. Clone the repository:
    ```bash
    git clone [https://github.com/ALB1381/PersonalAIAgent.git](https://github.com/ALB1381/PersonalAIAgent.git)
+   If you wanted to add a migration or update DB please change <TargetFrameworks>net10.0-windows10.0.19041.0</TargetFrameworks> to <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
