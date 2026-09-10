@@ -6,8 +6,26 @@
 @inject IAgentService AgentService
 
 <div class="chat-container">
-    <header class="chat-header">
-        <h2>My Personal AI Agent</h2>
+    <header class="chat-header row">
+        <div class="col-12 row">
+            <div class="col-3">
+                <h2>My Personal AI Agent</h2>
+            </div>
+             <div class="col-7">
+               
+             </div>
+            <div class="col-2 row justify-content-end">
+                <NavLink class="col-2" href="https://github.com/ALB1381/PersonalAIAgent">
+                    <i class="bi bi-github"></i>
+                </NavLink>
+                <NavLink class="col-2" href="https://www.linkedin.com/in/ali-barzegar-273962243/">
+                    <i class="bi bi-linkedin"></i>
+                </NavLink>
+             </div>
+            <NavLink href="/manage-api">
+                Manage APIs
+            </NavLink>
+        </div>
     </header>
 
     <!-- Voice Listening Overlay -->

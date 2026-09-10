@@ -1,0 +1,159 @@
+﻿@page "/manage-api"
+@using System.Threading.Tasks
+@using PersonalAIAgent.Core.Interfaces
+@inject IAgentService AgentService
+<div class="page-container">
+    @if (IsLoading)
+    {
+        <!-- 2.5 Second Loading Animation -->
+        <div class="loading-screen">
+            <div class="loading-circle"></div>
+            <p class="loading-text">Loading API Settings...</p>
+        </div>
+    }
+    else
+    {
+        <div class="content-fade-in">
+            <header class="chat-header row">
+                <div class="col-12 row">
+                    <div class="col-3">
+                        <h2>My Personal AI Agent/Manage API</h2>
+                    </div>
+                    <div class="col-7">
+                    </div>
+                    <div class="col-2 row justify-content-end">
+                        <NavLink class="col-2" href="https://github.com/ALB1381/PersonalAIAgent">
+                            <i class="bi bi-github"></i>
+                        </NavLink>
+                        <NavLink class="col-2" href="https://www.linkedin.com/in/ali-barzegar-273962243/">
+                            <i class="bi bi-linkedin"></i>
+                        </NavLink>
+                    </div>
+                    <NavLink href="/">
+                        Home
+                    </NavLink>
+                </div>
+            </header>
+
+            <div class="api-status-section">
+                <div class="status-header">
+                    <h3>Current API Key</h3>
+                    <span class="status-badge @(HasApi ? "active" : "inactive")">
+                        @(HasApi ? "Configured" : "Not Set")
+                    </span>
+                </div>
+
+                @if (IsEditing)
+                {
+                    <div class="edit-api-form">
+                        <input type="text" @bind="DraftApiKey" placeholder="Paste your API key here (e.g., AIzaSy...)" />
+                        <div class="form-actions">
+                            <button class="btn-primary" @onclick="SaveApi">Save</button>
+                            <button class="btn-secondary" @onclick="CancelEdit">Cancel</button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="api-key-display">
+                        @if (HasApi)
+                        {
+                            <span class="key-masked">@MaskApiKey(CurrentApiKey)</span>
+                            <button class="btn-primary" @onclick="StartEdit">Edit API</button>
+                        }
+                        else
+                        {
+                            <span class="key-masked empty">No API key is currently configured for this agent.</span>
+                            <button class="btn-primary" @onclick="StartEdit">Add API</button>
+                        }
+                    </div>
+                }
+            </div>
+
+            @if (!HasApi && !IsEditing)
+            {
+                <div class="tutorial-section">
+                    <h3>How to get your Google API Key</h3>
+                    <div class="cards-container">
+                        <div class="tutorial-card card-1">
+                            <div class="card-icon">1</div>
+                            <h4>Visit Google AI Studio</h4>
+                            <p>Go to the Google AI developer portal to access the Gemini API dashboard.</p>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="card-link">Open AI Studio ↗</a>
+                        </div>
+
+                        <div class="tutorial-card card-2">
+                            <div class="card-icon">2</div>
+                            <h4>Create a New Key</h4>
+                            <p>Click the <strong>"Create API key"</strong> button. You can bind it to an existing Google Cloud project or create a new one.</p>
+                        </div>
+
+                        <div class="tutorial-card card-3">
+                            <div class="card-icon">3</div>
+                            <h4>Add it to your Agent</h4>
+                            <p>Copy the generated key and paste it using the <strong>"Add API"</strong> button above to bring your agent online.</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool IsLoading = true;
+    private bool IsEditing = false;
+    private string CurrentApiKey = string.Empty;
+    private string DraftApiKey = string.Empty;
+
+    // Computed property to check if an API exists
+    private bool HasApi => !string.IsNullOrWhiteSpace(CurrentApiKey);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulate loading time (2.5 seconds) to show the animation
+        await Task.Delay(2500);
+
+        // TODO: In the future, load the saved API key from a database or secure storage here.
+        var api = await AgentService.GetApiKey();
+
+        if(api !=null)
+            CurrentApiKey = api.APIString;
+
+        IsLoading = false;
+    }
+
+    private void StartEdit()
+    {
+        DraftApiKey = CurrentApiKey;
+        IsEditing = true;
+    }
+
+    private void CancelEdit()
+    {
+        IsEditing = false;
+        DraftApiKey = string.Empty;
+    }
+
+    private async Task SaveApi()
+    {
+        if (!string.IsNullOrEmpty(CurrentApiKey))
+        {
+            CurrentApiKey = DraftApiKey.Trim();
+            await AgentService.EditAPIKey(CurrentApiKey);
+        }
+        if (!string.IsNullOrWhiteSpace(DraftApiKey))
+        {
+            CurrentApiKey = DraftApiKey.Trim();
+                   await AgentService.AddAPIKey(CurrentApiKey);
+                
+        }
+        IsEditing = false;
+    }
+
+    private string MaskApiKey(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key) || key.Length < 10) return "****************";
+        return $"{key.Substring(0, 6)}****************{key.Substring(key.Length - 4)}";
+    }
+}

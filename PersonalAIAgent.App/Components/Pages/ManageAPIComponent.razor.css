@@ -1,0 +1,316 @@
+.page-container {
+    height: 100vh;
+    background-color: #121212;
+    color: #e0e0e0;
+    border-radius: 8px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    position: relative;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.chat-header {
+    padding: 16px 24px;
+    background-color: #1e1e1e;
+    border-bottom: 1px solid #333;
+}
+
+    .chat-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #ffffff;
+    }
+/* --- Loading Animation --- */
+.loading-screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #121212;
+}
+
+.loading-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0078d4, #8a2be2);
+    background-size: 200% 200%;
+    animation: pulse-size 1s infinite alternate ease-in-out, color-shift 2s infinite alternate ease-in-out;
+}
+
+.loading-text {
+    margin-top: 24px;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #a0a0a0;
+    animation: pulse-opacity 1s infinite alternate ease-in-out;
+}
+
+/* --- Main Content Layout --- */
+.content-fade-in {
+    animation: fade-in 0.6s ease-out forwards;
+}
+
+.page-header {
+    padding: 20px 24px;
+    background-color: #1e1e1e;
+    border-bottom: 1px solid #333;
+}
+
+    .page-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #ffffff;
+    }
+
+.api-status-section {
+    margin: 24px;
+    padding: 24px;
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+}
+
+.status-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+    .status-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #ffffff;
+    }
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+    .status-badge.active {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: #10b981; /* Emerald green */
+    }
+
+    .status-badge.inactive {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: #ef4444; /* Red */
+    }
+
+.api-key-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #121212;
+    padding: 16px;
+    border-radius: 6px;
+    border: 1px solid #2d2d2d;
+}
+
+.key-masked {
+    font-family: monospace;
+    font-size: 1.1rem;
+    color: #0078d4;
+    letter-spacing: 2px;
+}
+
+    .key-masked.empty {
+        font-family: inherit;
+        font-size: 0.95rem;
+        color: #888;
+        letter-spacing: normal;
+    }
+
+/* --- Edit Form --- */
+.edit-api-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+    .edit-api-form input {
+        padding: 12px 16px;
+        background-color: #121212;
+        border: 1px solid #0078d4;
+        border-radius: 6px;
+        color: #ffffff;
+        font-family: monospace;
+        font-size: 1rem;
+        outline: none;
+    }
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* --- Buttons --- */
+.btn-primary, .btn-secondary {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #0078d4;
+    color: #ffffff;
+}
+
+    .btn-primary:hover {
+        background-color: #005a9e;
+    }
+
+.btn-secondary {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+    .btn-secondary:hover {
+        background-color: #444;
+    }
+
+/* --- Animated Cards Section --- */
+.tutorial-section {
+    margin: 32px 24px;
+}
+
+    .tutorial-section h3 {
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        color: #ffffff;
+    }
+
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.tutorial-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 24px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    /* The animation that brings them in */
+    animation: slide-up 0.5s ease-out forwards;
+}
+
+/* Stagger the delays so they appear one by one */
+.card-1 {
+    animation-delay: 0.1s;
+}
+
+.card-2 {
+    animation-delay: 0.3s;
+}
+
+.card-3 {
+    animation-delay: 0.5s;
+}
+
+.card-icon {
+    width: 32px;
+    height: 32px;
+    background-color: #0078d4;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+.tutorial-card h4 {
+    margin: 0 0 12px 0;
+    font-size: 1.05rem;
+    color: #fff;
+}
+
+.tutorial-card p {
+    font-size: 0.9rem;
+    color: #a0a0a0;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.card-link {
+    color: #0078d4;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+    .card-link:hover {
+        text-decoration: underline;
+    }
+
+/* --- Keyframes --- */
+@keyframes pulse-size {
+    0% {
+        transform: scale(0.9);
+        box-shadow: 0 0 15px rgba(0, 120, 212, 0.3);
+    }
+
+    100% {
+        transform: scale(1.1);
+        box-shadow: 0 0 35px rgba(138, 43, 226, 0.7);
+    }
+}
+
+@keyframes color-shift {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+
+    100% {
+        filter: hue-rotate(60deg);
+    }
+}
+
+@keyframes pulse-opacity {
+    0% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

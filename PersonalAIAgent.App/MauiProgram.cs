@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using PersonalAIAgent.Core.Data;
 using PersonalAIAgent.Core.Interfaces;
 using PersonalAIAgent.Core.Services;
 
@@ -18,15 +20,24 @@ namespace PersonalAIAgent.App
                 });
 
             builder.Services.AddMauiBlazorWebView();
-            builder.Services.AddSingleton<IAgentService, AgentService>();
-      
-
+            builder.Services.AddScoped<IAgentService, AgentService>();
+            string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PersonalAIAgent.db");
+            builder.Services.AddDbContext<Context>(options =>
+                    options.UseSqlite($"Data Source={dbPath}"));
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
 
-            return builder.Build();
+            var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<Context>();
+                context.Database.Migrate();
+            }
+
+            return app;
         }
     }
 }

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>PersonalAIAgent.App</title>
     <base href="/" />
-    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="app.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="PersonalAIAgent.App.styles.css" />
     <link rel="icon" href="data:,">
 </head>
@@ -24,60 +24,59 @@
     </div>
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
-
     <!-- Voice Recognition Interop -->
     <script>
-                window.voiceInterop = {
-                    recognition: null,
-                    startListening: function (dotNetHelper) {
-                        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                        if (!SpeechRecognition) {
-                            console.error("Speech recognition is not supported in this environment.");
-                            alert("Speech recognition is not supported or needs to be enabled in WebView2.");
-                            return;
-                        }
+                        window.voiceInterop = {
+                            recognition: null,
+                            startListening: function (dotNetHelper) {
+                                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                                if (!SpeechRecognition) {
+                                    console.error("Speech recognition is not supported in this environment.");
+                                    alert("Speech recognition is not supported or needs to be enabled in WebView2.");
+                                    return;
+                                }
 
-                        this.recognition = new SpeechRecognition();
-                        this.recognition.continuous = false;
-                        this.recognition.interimResults = true;
+                                this.recognition = new SpeechRecognition();
+                                this.recognition.continuous = false;
+                                this.recognition.interimResults = true;
 
-                        this.recognition.onresult = (event) => {
-                            let interimTranscript = '';
-                            let finalTranscript = '';
+                                this.recognition.onresult = (event) => {
+                                    let interimTranscript = '';
+                                    let finalTranscript = '';
 
-                            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                                if (event.results[i].isFinal) {
-                                    finalTranscript += event.results[i][0].transcript;
-                                } else {
-                                    interimTranscript += event.results[i][0].transcript;
+                                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                                        if (event.results[i].isFinal) {
+                                            finalTranscript += event.results[i][0].transcript;
+                                        } else {
+                                            interimTranscript += event.results[i][0].transcript;
+                                        }
+                                    }
+
+                                    if (finalTranscript !== '') {
+                                        dotNetHelper.invokeMethodAsync('ProcessVoiceCommand', finalTranscript.trim());
+                                    } else {
+                                        dotNetHelper.invokeMethodAsync('UpdateTranscript', interimTranscript);
+                                    }
+                                };
+
+                                this.recognition.onerror = (event) => {
+                                    console.error("Speech recognition error", event.error);
+                                    dotNetHelper.invokeMethodAsync('StopListeningUI');
+                                };
+
+                                this.recognition.onend = () => {
+                                     dotNetHelper.invokeMethodAsync('StopListeningUI');
+                                };
+
+                                this.recognition.start();
+                            },
+
+                            stopListening: function () {
+                                if (this.recognition) {
+                                    this.recognition.stop();
                                 }
                             }
-
-                            if (finalTranscript !== '') {
-                                dotNetHelper.invokeMethodAsync('ProcessVoiceCommand', finalTranscript.trim());
-                            } else {
-                                dotNetHelper.invokeMethodAsync('UpdateTranscript', interimTranscript);
-                            }
                         };
-
-                        this.recognition.onerror = (event) => {
-                            console.error("Speech recognition error", event.error);
-                            dotNetHelper.invokeMethodAsync('StopListeningUI');
-                        };
-
-                        this.recognition.onend = () => {
-                             dotNetHelper.invokeMethodAsync('StopListeningUI');
-                        };
-
-                        this.recognition.start();
-                    },
-
-                    stopListening: function () {
-                        if (this.recognition) {
-                            this.recognition.stop();
-                        }
-                    }
-                };
     </script>
 </body>
 </html>

@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Mscc.GenerativeAI;
+using PersonalAIAgent.Core.Data;
 using PersonalAIAgent.Core.Interfaces;
 using PersonalAIAgent.Core.Models;
 using System;
@@ -9,19 +11,12 @@ namespace PersonalAIAgent.Core.Services
 {
     public class AgentService : IAgentService
     {
-        private readonly GenerativeModel? _aiModel;
-        
 
-        public AgentService()
+        PersonalAIAgent.Core.Data.Context _context; 
+        public AgentService(PersonalAIAgent.Core.Data.Context context)
         {
-           
-            //You should replace your api that you got from google ai studio
-            var apiKey = "Your API Key";
-            if (!string.IsNullOrWhiteSpace(apiKey))
-            {
-                var googleAI = new GoogleAI(apiKey: apiKey);
-                _aiModel = googleAI.GenerativeModel(model: Mscc.GenerativeAI.Types.Model.Gemini3Flash);
-            }
+            _context = context;
+        
         }
 
         public async Task<AgentResponse> CallAgent(CommandRequest request)
@@ -33,7 +28,11 @@ namespace PersonalAIAgent.Core.Services
 
             try
             {
-          
+                var apiKeyobj = await GetApiKey();
+                string apiKey = apiKeyobj.APIString;
+                GenerativeModel? _aiModel;
+                    var googleAI = new GoogleAI(apiKey: apiKey);
+                    _aiModel = googleAI.GenerativeModel(model: Mscc.GenerativeAI.Types.Model.Gemini3Flash);
                 if (_aiModel is null)
                 {
                     return Failure("No tool matched the request and GEMINI_API_KEY is not configured.");
@@ -50,7 +49,8 @@ namespace PersonalAIAgent.Core.Services
                 cmd.StartInfo.UseShellExecute = false;
                 cmd.Start();
 
-                cmd.StandardInput.WriteLine(response.Text.ToString());
+                var commandText = response.Text ?? string.Empty;
+                cmd.StandardInput.WriteLine(commandText);
                 cmd.StandardInput.Flush();
                 cmd.StandardInput.Close();
                 cmd.WaitForExit();
@@ -58,7 +58,7 @@ namespace PersonalAIAgent.Core.Services
 
                 return new AgentResponse
                 {
-                    ResponseText = response.Text,
+                    ResponseText = commandText,
                     ResponseStatusCode = 0
                 };
             }
@@ -73,5 +73,34 @@ namespace PersonalAIAgent.Core.Services
             ResponseText = message,
             ResponseStatusCode = 1
         };
+
+        public async Task AddAPIKey(string apiKey)
+        {
+           await _context.APIs.AddAsync(new PersonalAIAgent.Core.Data.API { APIString = apiKey });
+           await _context.SaveChangesAsync();
+        }
+
+        public async Task EditAPIKey(string APIkeyString)
+        {
+            var Target = _context.APIs.FirstOrDefault();
+            Target.APIString = APIkeyString;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAPIKey()
+        {
+            var Target = _context.APIs.FirstOrDefault();
+            if (Target != null)
+            {
+                _context.APIs.Remove(Target);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+    
+        public async Task<API?> GetApiKey()
+        {
+            return await _context.APIs.FirstOrDefaultAsync();
+        }
     }
 }
