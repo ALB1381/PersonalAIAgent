@@ -52,4 +52,15 @@ The application takes the raw string returned by Gemini and passes it directly t
 1. Clone the repository:
    ```bash
    git clone [https://github.com/ALB1381/PersonalAIAgent.git](https://github.com/ALB1381/PersonalAIAgent.git)
-   If you wanted to add a migration or update DB please change <TargetFrameworks>net10.0-windows10.0.19041.0</TargetFrameworks> to <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+   If you want to publish the project as release you can use this command:
+2. Add migration adn update data base: If you wanted to add a migration or update DB please change <TargetFrameworks>net10.0-windows10.0.19041.0</TargetFrameworks> to <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+     ```bash
+     dotnet ef migrations add InitialSqliteCreate --project PersonalAIAgent.Core
+     dotnet ef database update --project PersonalAIAgent.Core --startup-project PersonalAIAgent.App
+3. Publish project Or run it in visual studio:
+   3.1: Run it in visual studio by running the App project
+   3.2: Create the exe file by this command 
+   ```bash
+   dotnet publish PersonalAIAgent.App\PersonalAIAgent.App.csproj -f net10.0-windows10.0.19041.0 -c Release -r win-x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true --self-contained true
+4. You can run the exe file by open \PersonalAIAgent.App\bin\Release\net10.0-windows10.0.19041.0\win-x64\PersonalAIAgent.App.exe
+and here is the windows app to run the application.
