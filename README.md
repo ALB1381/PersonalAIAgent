@@ -104,7 +104,7 @@ If you published the app, you can launch the Windows application by running the 
 If this AI agent saved you some time, or if you just want to support my open-source work, I'd gladly accept an espresso! 
 
 **Crypto Wallet Support:**
-* **[Tron]:** `TTPmTkgZCFaBWz4xdR3V85SsQcqLwdbgNR`
+* **[USDT on tron network only]:** `TTPmTkgZCFaBWz4xdR3V85SsQcqLwdbgNR`
 
 
 **Developed by Ali Barzegar**
