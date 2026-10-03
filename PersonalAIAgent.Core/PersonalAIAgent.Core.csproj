@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -9,7 +9,11 @@
   <ItemGroup>
     <Folder Include="Agents\" />
   </ItemGroup>
-
+<ItemGroup>
+  <Content Include="vosk-model-small-en-us-0.15\**\*">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
@@ -22,6 +26,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Mscc.GenerativeAI" Version="3.1.0" />
+    <PackageReference Include="NAudio" Version="3.1.1-preview.2" />
+    <PackageReference Include="NAudio.WinMM" Version="3.1.1-preview.2" />
+    <PackageReference Include="Vosk" Version="0.3.38" />
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,10 @@
 ﻿@page "/"
+@using NAudio.Wave
 @using PersonalAIAgent.Core.Interfaces
 @using PersonalAIAgent.Core.Models
+@using PersonalAIAgent.Core.Services
+@using Vosk
 @implements IDisposable
-@inject IJSRuntime JS
 @inject IAgentService AgentService
 
 <div class="chat-container">
@@ -69,48 +71,59 @@
     private string CurrentInput = string.Empty;
     private bool IsListening = false;
     private bool _isSending;
-    private DotNetObjectReference<Home>? _objRef;
-
+    VoskVoiceService VoiceService = new VoskVoiceService();
     protected override void OnInitialized()
     {
-        _objRef = DotNetObjectReference.Create(this);
-        Messages.Add(new ChatMessage { Text = "Agent initialized. Ready when you are.", IsUser = false });
+        Messages.Add(new ChatMessage { Text = "Hello, I'm your AI assistant.", IsUser = false });
+        VoiceService = new VoskVoiceService();
+
+        VoiceService.OnPartialTranscript = HandlePartialTranscript;
+        VoiceService.OnFinalTranscript = HandleFinalTranscript;
+        VoiceService.OnStopped = HandleVoiceStopped;
     }
 
-    private async Task ToggleListening()
+    private void ToggleListening()
     {
         IsListening = !IsListening;
         if (IsListening)
         {
-            CurrentInput = string.Empty; // Clears the input when the mic activates
-            await JS.InvokeVoidAsync("voiceInterop.startListening", _objRef);
+            CurrentInput = string.Empty;
+            VoiceService.StartListening();
         }
         else
         {
-            await JS.InvokeVoidAsync("voiceInterop.stopListening");
+            VoiceService.StopListening();
         }
     }
 
-    [JSInvokable]
-    public async Task UpdateTranscript(string transcript)
+    private void HandlePartialTranscript(string text)
     {
-        CurrentInput = transcript;
-        await InvokeAsync(StateHasChanged);
+    
+        InvokeAsync(() =>
+        {
+            CurrentInput = text;
+            StateHasChanged();
+        });
     }
 
-    [JSInvokable]
-    public async Task ProcessVoiceCommand(string finalTranscript)
+    private void HandleFinalTranscript(string text)
     {
-        CurrentInput = finalTranscript;
-        IsListening = false;
-        await SendMessage();
+        InvokeAsync(async () =>
+        {
+            CurrentInput = text;
+            IsListening = false;
+            VoiceService.StopListening();
+            await SendMessage();
+        });
     }
 
-    [JSInvokable]
-    public async Task StopListeningUI()
+    private void HandleVoiceStopped()
     {
-        IsListening = false;
-        await InvokeAsync(StateHasChanged);
+        InvokeAsync(() =>
+        {
+            IsListening = false;
+            StateHasChanged();
+        });
     }
 
     private async Task HandleKeyPress(KeyboardEventArgs e)
@@ -162,7 +175,12 @@
         }
     }
 
-    public void Dispose() => _objRef?.Dispose();
+    public void Dispose()
+    {
+        VoiceService.OnPartialTranscript = null;
+        VoiceService.OnFinalTranscript = null;
+        VoiceService.OnStopped = null;
+    }
 
     public class ChatMessage
     {
